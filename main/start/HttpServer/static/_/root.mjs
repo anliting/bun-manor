@@ -9,6 +9,7 @@ doe.head(doe.style(`
         margin:0;
         background-color:#888;
         text-align:center;
+        overflow:hidden;
     }
     body::after{
         content:'';
