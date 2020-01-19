@@ -1,0 +1,10 @@
+{
+    "dependencies":{
+        "@anliting/fs":"",
+        "concat-stream":"",
+        "mime":"",
+        "rmrf":"",
+        "rollup":"",
+        "ws":""
+    }
+}
