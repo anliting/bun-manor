@@ -46,8 +46,22 @@ doe.head(doe.style(`
             view.child[0].y++
     }
     doe.body(canvas)
-    function frame(){
+    let second
+    function frame(now){
         requestAnimationFrame(frame)
+        if(!second)
+            second={
+                start:now,
+                count:0,
+            }
+        if(second.start+1e3<=now){
+            console.log(second.count)
+            second={
+                start:second.start+1e3,
+                count:0,
+            }
+        }
+        second.count++
         context.fillStyle='#444'
         context.fillRect(0,0,640,360)
         draw(view,canvas,320,180)
