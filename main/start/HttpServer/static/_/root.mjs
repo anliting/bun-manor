@@ -23,39 +23,45 @@ doe.head(doe.style(`
 `))
 ;(async()=>{
     let view={
-        child:[{
-            x:0,
-            y:0,
-            background:
-                await new Promise(rs=>doe.img({
-                    src:'_/img/grass.png',
-                    onload(){rs(this)},
-                }))
-        },{
-            x:0,
-            y:0,
-            child:[{
-                x:-16,
-                y:-16,
-                image:await new Promise(rs=>doe.img({
-                    src:'_/img/bun.png',
-                    onload(){rs(this)},
-                }))
-            }],
-        }]
+        child:[[
+            0,
+            0,
+            {
+                background:
+                    await new Promise(rs=>doe.img({
+                        src:'_/img/grass.png',
+                        onload(){rs(this)},
+                    }))
+            }
+        ],[
+            0,
+            0,
+            {
+                child:[[
+                    -16,
+                    -16,
+                    {
+                        image:await new Promise(rs=>doe.img({
+                            src:'_/img/bun.png',
+                            onload(){rs(this)},
+                        }))
+                    }
+                ]],
+            }
+        ]]
     }
     let canvas=doe.canvas({width:640,height:360})
     let context=canvas.getContext('2d')
     requestAnimationFrame(frame)
     onkeydown=e=>{
         if(e.key=='ArrowLeft')
-            view.child[0].x--
+            view.child[0][0]--
         if(e.key=='ArrowRight')
-            view.child[0].x++
+            view.child[0][0]++
         if(e.key=='ArrowUp')
-            view.child[0].y--
+            view.child[0][1]--
         if(e.key=='ArrowDown')
-            view.child[0].y++
+            view.child[0][1]++
     }
     doe.body(canvas)
     let second
@@ -79,6 +85,11 @@ doe.head(doe.style(`
         draw(view,canvas,320,180)
     }
     function draw(o,canvas,x,y){
+        if(o.image)
+            context.drawImage(
+                o.image,
+                x,y
+            )
         if(o.background){
             let backgroundCanvas=doe.canvas({
                 width:640+o.background.width,
@@ -101,7 +112,7 @@ doe.head(doe.style(`
         }
         if(o.child)
             for(let p of o.child)
-                draw(p,canvas,x+p.x,y+p.y)
+                draw(p[2],canvas,x+p[0],y+p[1])
     }
 })()
 /*
