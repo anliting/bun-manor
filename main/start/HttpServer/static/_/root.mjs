@@ -56,7 +56,7 @@ doe.head(doe.style(`
                 count:0,
             }
         if(second.start+1e3<=now){
-            console.log(second.count)
+            console.log(second.start,second.count)
             second={
                 start:second.start+1e3,
                 count:0,
