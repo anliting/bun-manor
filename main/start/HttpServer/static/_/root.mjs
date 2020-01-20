@@ -31,6 +31,17 @@ doe.head(doe.style(`
                     src:'_/img/grass.png',
                     onload(){rs(this)},
                 }))
+        },{
+            x:0,
+            y:0,
+            child:[{
+                x:-16,
+                y:-16,
+                image:await new Promise(rs=>doe.img({
+                    src:'_/img/bun.png',
+                    onload(){rs(this)},
+                }))
+            }],
         }]
     }
     let canvas=doe.canvas({width:640,height:360})
