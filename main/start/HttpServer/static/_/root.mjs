@@ -1,4 +1,5 @@
 import doe from         './lib/doe/main/doe.mjs'
+import{Vector2}from     './lib/dt/main/dt.mjs'
 doe.body(1,document.getElementsByTagName('script')[0])
 doe.head(doe.style(`
     html{
@@ -28,19 +29,21 @@ function loadImage(src){
     }))
 }
 function backgroundDraw(img){
-    return(canvas,context,x,y)=>{
+    return(canvas,context,position)=>{
         let backgroundCanvas=doe.canvas({
-            width:640+img.width,
-            height:360+img.height
+            width:canvas.width+img.width,
+            height:canvas.height+img.height
         })
         let c=backgroundCanvas.getContext('2d')
         c.fillStyle=c.createPattern(img,'repeat')
         c.fillRect(0,0,backgroundCanvas.width,backgroundCanvas.height)
-        let cx=x-canvas.width/2,cy=y-canvas.height/2
-        cx=-mod(cx,img.width)
-        cy=-mod(cy,img.height)
+        let
+            imgSize=        new Vector2(img.width,img.height),
+            v=Vector2.numeric([position,imgSize],(a,b)=>
+                -mod(a,b)
+            )
         context.drawImage(
-            backgroundCanvas,cx,cy,
+            backgroundCanvas,...v,
             backgroundCanvas.width,backgroundCanvas.height,
             0,0,backgroundCanvas.width,backgroundCanvas.height
         )
@@ -50,29 +53,32 @@ function backgroundDraw(img){
     }
 }
 function imageDraw(img){
-    return(canvas,context,x,y)=>
-        context.drawImage(img,x,y)
+    return(canvas,context,position)=>
+        context.drawImage(img,...position)
 }
 ;(async()=>{
+    let image={
+        bun:loadImage('_/img/bun.png'),
+        grass:loadImage('_/img/grass.png'),
+    }
     let bun={
-        imageDraw:imageDraw(await loadImage('_/img/bun.png')),
-        draw(canvas,context,x,y){
-            this.imageDraw(canvas,context,x-16,y-16)
+        imageDraw:imageDraw(await image.bun),
+        draw(canvas,context,position){
+            this.imageDraw(canvas,context,position.subN(16))
         },
     }
     let map={
-        backgroundDraw:backgroundDraw(await loadImage('_/img/grass.png')),
-        draw(canvas,context,x,y){
-            this.backgroundDraw(canvas,context,x,y)
-            this.bun.draw(canvas,context,x+this.toBun.x,y+this.toBun.y)
+        backgroundDraw:backgroundDraw(await image.grass),
+        draw(canvas,context,position){
+            this.backgroundDraw(canvas,context,position)
+            this.bun.draw(canvas,context,position.newAdd(this.toBun))
         },
-        toBun:{x:0,y:0},
+        toBun:new Vector2,
         bun,
     }
     let view={
-        draw(canvas,context,x,y){
-            this.map.draw(canvas,context,x-this.map.toBun.x,y-this.map.toBun.y)
-            //this.map.draw(canvas,context,x,y)
+        draw(canvas,context,position){
+            this.map.draw(canvas,context,position.newSub(this.map.toBun))
         },
         map,
     }
@@ -92,6 +98,7 @@ function imageDraw(img){
     doe.body(canvas)
     let second
     function frame(now){
+        now=~~now
         requestAnimationFrame(frame)
         if(!second)
             second={
@@ -111,7 +118,7 @@ function imageDraw(img){
         let start=performance.now()
         context.fillStyle='#444'
         context.fillRect(0,0,640,360)
-        view.draw(canvas,context,320,180)
+        view.draw(canvas,context,new Vector2(320,180))
         second.time+=performance.now()-start
     }
 })()
