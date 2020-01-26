@@ -28,17 +28,17 @@ function loadImage(src){
         onload(){rs(this)},
     }))
 }
-function backgroundDraw(img){
-    return(canvas,context,position)=>{
-        let backgroundCanvas=doe.canvas({
-            width:canvas.width+img.width,
-            height:canvas.height+img.height
-        })
-        let c=backgroundCanvas.getContext('2d')
-        c.fillStyle=c.createPattern(img,'repeat')
-        c.fillRect(0,0,backgroundCanvas.width,backgroundCanvas.height)
+function backgroundDraw(canvas,img){
+    let backgroundCanvas=doe.canvas({
+        width:canvas.width+img.width,
+        height:canvas.height+img.height
+    })
+    let c=backgroundCanvas.getContext('2d')
+    c.fillStyle=c.createPattern(img,'repeat')
+    c.fillRect(0,0,backgroundCanvas.width,backgroundCanvas.height)
+    let imgSize=new Vector2(img.width,img.height)
+    return(context,position)=>{
         let
-            imgSize=        new Vector2(img.width,img.height),
             v=Vector2.numeric([position,imgSize],(a,b)=>
                 -mod(a,b)
             )
@@ -52,25 +52,26 @@ function backgroundDraw(img){
         }
     }
 }
-function imageDraw(img){
-    return(canvas,context,position)=>
+function imageDraw(canvas,img){
+    return(context,position)=>
         context.drawImage(img,...position)
 }
 ;(async()=>{
+    let canvas=doe.canvas({width:640,height:360})
     let image={
-        bun:loadImage('_/img/bun.png'),
-        grass:loadImage('_/img/grass.png'),
+        bun:    loadImage('_/img/bun.png'),
+        grass:  loadImage('_/img/grass.png'),
     }
     let bun={
-        imageDraw:imageDraw(await image.bun),
+        imageDraw:imageDraw(canvas,await image.bun),
         draw(canvas,context,position){
-            this.imageDraw(canvas,context,position.subN(16))
+            this.imageDraw(context,position.subN(16))
         },
     }
     let map={
-        backgroundDraw:backgroundDraw(await image.grass),
+        backgroundDraw:backgroundDraw(canvas,await image.grass),
         draw(canvas,context,position){
-            this.backgroundDraw(canvas,context,position)
+            this.backgroundDraw(context,position)
             this.bun.draw(canvas,context,position.newAdd(this.toBun))
         },
         toBun:new Vector2,
@@ -82,7 +83,6 @@ function imageDraw(img){
         },
         map,
     }
-    let canvas=doe.canvas({width:640,height:360})
     let context=canvas.getContext('2d')
     requestAnimationFrame(frame)
     onkeydown=e=>{
@@ -98,26 +98,23 @@ function imageDraw(img){
     doe.body(canvas)
     let second
     function frame(now){
-        now=~~now
         requestAnimationFrame(frame)
         if(!second)
             second={
                 start:now,
-                count:0,
+                frame:0,
                 time:0,
             }
         if(second.start+1e3<=now){
-            console.log(second.start,second.count,second.time)
+            console.log(second.frame,second.time.toFixed(3))
             second={
                 start:second.start+1e3,
-                count:0,
+                frame:0,
                 time:0,
             }
         }
-        second.count++
+        second.frame++
         let start=performance.now()
-        context.fillStyle='#444'
-        context.fillRect(0,0,640,360)
         view.draw(canvas,context,new Vector2(320,180))
         second.time+=performance.now()-start
     }
