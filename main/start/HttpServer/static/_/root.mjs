@@ -64,26 +64,27 @@ function imageDraw(canvas,img){
     }
     let bun={
         imageDraw:imageDraw(canvas,await image.bun),
-        draw(canvas,context,position){
+        draw(context,position){
             this.imageDraw(context,position.subN(16))
         },
     }
     let map={
         backgroundDraw:backgroundDraw(canvas,await image.grass),
-        draw(canvas,context,position){
+        draw(context,position){
             this.backgroundDraw(context,position)
-            this.bun.draw(canvas,context,position.newAdd(this.toBun))
+            this.bun.draw(context,position.newAdd(this.toBun))
         },
         toBun:new Vector2,
         bun,
     }
     let view={
-        draw(canvas,context,position){
-            this.map.draw(canvas,context,position.newSub(this.map.toBun))
+        draw(context,position){
+            this.map.draw(context,position.newSub(this.map.toBun))
         },
         map,
     }
     let context=canvas.getContext('2d')
+    let middle=new Vector2(320,180)
     requestAnimationFrame(frame)
     onkeydown=e=>{
         if(e.key=='ArrowLeft')
@@ -115,7 +116,7 @@ function imageDraw(canvas,img){
         }
         second.frame++
         let start=performance.now()
-        view.draw(canvas,context,new Vector2(320,180))
+        view.draw(context,middle)
         second.time+=performance.now()-start
     }
 })()
