@@ -33,11 +33,15 @@ function loadImage(src){
         bun:    loadImage('_/img/bun.png'),
         grass:  loadImage('_/img/grass.png'),
     }
+    image={
+        bun:    await image.bun,
+        grass:  await image.grass,
+    }
     let game=new Game(image)
-    await game.load
     requestAnimationFrame(frame)
     onkeydown=game.onkeydown.bind(game)
-    doe.body(game.canvas)
+    onkeyup=game.onkeyup.bind(game)
+    doe.body(game.node)
     let second
     function frame(now){
         requestAnimationFrame(frame)
