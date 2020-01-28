@@ -1,5 +1,6 @@
 import doe from         './lib/doe/main/doe.mjs'
 import Vector2 from     './lib/dt/main/dt/Vector2.mjs'
+let speed=0.060
 function backgroundDraw(canvas,context,img){
     let backgroundCanvas=doe.canvas({
         width:canvas.width+img.width,
@@ -29,6 +30,13 @@ function imageDraw(canvas,context,img){
         context.drawImage(img,...position)
 }
 function Game(image){
+    this._event=[]
+    this._key={
+        ArrowDown:0,
+        ArrowLeft:0,
+        ArrowRight:0,
+        ArrowUp:0,
+    }
     let canvas=doe.canvas({width:640,height:360})
     let context=canvas.getContext('2d')
     let bun={
@@ -37,7 +45,7 @@ function Game(image){
             this.imageDraw(position.subN(16))
         },
     }
-    this.map={
+    this._map={
         backgroundDraw:backgroundDraw(canvas,context,image.grass),
         draw(position){
             this.backgroundDraw(position)
@@ -46,30 +54,67 @@ function Game(image){
         toBun:new Vector2,
         bun,
     }
-    this.view={
+    this._view={
         draw(position){
             this.map.draw(position.newSub(this.map.toBun))
         },
-        map:this.map,
+        map:this._map,
     }
-    this.middle=new Vector2(320,180)
+    this._time=0
+    this._bunDirection=new Vector2
+    this._middle=new Vector2(320,180)
     this.node=canvas
 }
+Game.prototype._advance=function(t){
+    let dt=t-this._time,l=+this._bunDirection
+    if(l)
+        this._map.toBun=Vector2.numeric([
+            this._map.toBun,this._bunDirection
+        ],(a,b)=>
+            a+b/l*dt*speed
+        )
+    this._time=t
+}
+Game.prototype._updateBunDirection=function(){
+    this._bunDirection=new Vector2
+    if(this._key.ArrowLeft)
+        this._bunDirection.x--
+    if(this._key.ArrowRight)
+        this._bunDirection.x++
+    if(this._key.ArrowUp)
+        this._bunDirection.y--
+    if(this._key.ArrowDown)
+        this._bunDirection.y++
+}
 Game.prototype.onkeydown=function(e){
-    console.log(e.timeStamp,e.key)
-    if(e.key=='ArrowLeft')
-        this.map.toBun.x--
-    if(e.key=='ArrowRight')
-        this.map.toBun.x++
-    if(e.key=='ArrowUp')
-        this.map.toBun.y--
-    if(e.key=='ArrowDown')
-        this.map.toBun.y++
+    this._event.push(['keydown',e.key,e.timeStamp])
 }
 Game.prototype.onkeyup=function(e){
-    console.log(e.timeStamp,e.key)
+    this._event.push(['keyup',e.key,e.timeStamp])
 }
 Game.prototype.out=function(now){
-    this.view.draw(this.middle)
+    for(let e of this._event){
+        if(e[0]=='keydown'){
+            this._key[e[1]]=1
+            if([
+                'ArrowDown','ArrowLeft','ArrowRight','ArrowUp',
+            ].includes(e[1])){
+                this._advance(e[2])
+                this._updateBunDirection()
+            }
+        }
+        if(e[0]=='keyup'){
+            this._key[e[1]]=0
+            if([
+                'ArrowDown','ArrowLeft','ArrowRight','ArrowUp',
+            ].includes(e[1])){
+                this._advance(e[2])
+                this._updateBunDirection()
+            }
+        }
+    }
+    this._event=[]
+    this._advance(now)
+    this._view.draw(this._middle)
 }
 export default Game
