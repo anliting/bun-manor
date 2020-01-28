@@ -37,7 +37,9 @@ function Game(image){
         ArrowRight:0,
         ArrowUp:0,
     }
-    let canvas=doe.canvas({width:640,height:360})
+    let canvas=doe.canvas({width:640,height:360,oncontextmenu(e){
+        e.preventDefault()
+    }})
     let context=canvas.getContext('2d')
     let bun={
         imageDraw:imageDraw(canvas,context,image.bun),
